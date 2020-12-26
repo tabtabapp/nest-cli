@@ -18,6 +18,7 @@ export class StartCommand extends AbstractCommand {
       .option('--webpackPath [path]', 'Path to webpack configuration.')
       .option('--tsc', 'Use tsc for compilation.')
       .option('-e, --exec [binary]', 'Binary to run (default: "node").')
+      .option('--concurrently [action]', 'Run commands concurrently')
       .option(
         '--preserveWatchOutput',
         'Use "preserveWatchOutput" option when tsc watch mode.',
@@ -39,6 +40,10 @@ export class StartCommand extends AbstractCommand {
         options.push({
           name: 'path',
           value: command.path,
+        });
+        options.push({
+          name: 'concurrently',
+          value: command.concurrently,
         });
         options.push({
           name: 'webpackPath',

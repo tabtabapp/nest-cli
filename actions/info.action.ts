@@ -68,9 +68,7 @@ const displayCliVersion = () => {
   );
 };
 
-const readProjectPackageJsonDependencies = async (): Promise<
-  PackageJsonDependencies
-> => {
+const readProjectPackageJsonDependencies = async (): Promise<PackageJsonDependencies> => {
   return new Promise<PackageJsonDependencies>((resolve, reject) => {
     readFile(
       join(process.cwd(), 'package.json'),

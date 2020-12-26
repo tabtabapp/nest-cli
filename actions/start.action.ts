@@ -36,12 +36,17 @@ export class StartAction extends BuildAction {
       const watchAssetsModeOption = options.find(
         (option) => option.name === 'watchAssets',
       );
+      const concurrentOption = options.find(
+        (option) => option.name === 'concurrently',
+      );
       const isWatchAssetsEnabled = !!(
         watchAssetsModeOption && watchAssetsModeOption.value
       );
       const debugFlag = debugModeOption && debugModeOption.value;
       const binaryToRun =
         binaryToRunOption && (binaryToRunOption.value as string | undefined);
+      const concurrentFlag =
+        concurrentOption && (concurrentOption.value as string);
 
       const { options: tsOptions } = this.tsConfigProvider.getByConfigFilename(
         pathToTsconfig,
@@ -53,6 +58,7 @@ export class StartAction extends BuildAction {
         debugFlag,
         outDir,
         binaryToRun,
+        concurrentFlag,
       );
 
       await this.runBuild(
@@ -78,6 +84,7 @@ export class StartAction extends BuildAction {
     debugFlag: boolean | string | undefined,
     outDirName: string,
     binaryToRun = 'node',
+    concurrentFlag?: string,
   ) {
     const sourceRoot = getValueOrDefault(configuration, 'sourceRoot', appName);
     const entryFile = getValueOrDefault(configuration, 'entryFile', appName);
@@ -98,6 +105,7 @@ export class StartAction extends BuildAction {
             debugFlag,
             outDirName,
             binaryToRun,
+            concurrentFlag,
           );
           childProcessRef.on('exit', () => (childProcessRef = undefined));
         });
@@ -111,6 +119,7 @@ export class StartAction extends BuildAction {
           debugFlag,
           outDirName,
           binaryToRun,
+          concurrentFlag,
         );
         childProcessRef.on('exit', () => (childProcessRef = undefined));
       }
@@ -123,6 +132,7 @@ export class StartAction extends BuildAction {
     debug: boolean | string | undefined,
     outDirName: string,
     binaryToRun: string,
+    concurrentFlag: string | undefined,
   ) {
     let outputFilePath = join(outDirName, sourceRoot, entryFile);
     if (!fs.existsSync(outputFilePath + '.js')) {
@@ -142,6 +152,21 @@ export class StartAction extends BuildAction {
       const inspectFlag =
         typeof debug === 'string' ? `--inspect=${debug}` : '--inspect';
       processArgs.unshift(inspectFlag);
+    }
+
+    if (concurrentFlag) {
+      return spawn(
+        'node',
+        [
+          './node_modules/concurrently/bin/concurrently',
+          `"${binaryToRun} ${processArgs.join(' ')}"`,
+          `"${concurrentFlag}"`,
+        ],
+        {
+          stdio: 'inherit',
+          shell: true,
+        },
+      );
     }
     return spawn(binaryToRun, processArgs, {
       stdio: 'inherit',
