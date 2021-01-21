@@ -153,12 +153,11 @@ export class StartAction extends BuildAction {
         typeof debug === 'string' ? `--inspect=${debug}` : '--inspect';
       processArgs.unshift(inspectFlag);
     }
-
     if (concurrentFlag) {
       return spawn(
         'node',
         [
-          './node_modules/concurrently/bin/concurrently',
+          '../../node_modules/concurrently/bin/concurrently',
           `"${binaryToRun} ${processArgs.join(' ')}"`,
           `"${concurrentFlag}"`,
         ],
